@@ -11,7 +11,7 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays 
             (songplay_id SERIAL PRIMARY KEY
             ,start_time varchar
-            , user_id int NOT NULL
+            , user_id varchar NOT NULL
             , level varchar
             , song_id varchar 
             , artist_id varchar
@@ -21,7 +21,7 @@ songplay_table_create = ("""CREATE TABLE IF NOT EXISTS songplays
 """)
 
 user_table_create =  (""" CREATE table if not exists users
-        (user_id int PRIMARY KEY
+        (user_id varchar PRIMARY KEY
         , first_name varchar
         , last_name varchar
         , gender varchar
@@ -59,28 +59,38 @@ time_table_create =  ("""CREATE table if not exists time
 # INSERT RECORDS
 
 songplay_table_insert = ("""Insert into songplays
-        ( start_time
-        , user_id
-        , level
-        , song_id
-        , artist_id
-        , session_id
-        , location
-        , user_agent) 
-        values (%s,%s,%s,%s,%s,%s,%s,%s);
+        (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) 
+        values (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (songplay_id) 
+        DO NOTHING;;
 """)
 
 
+#user_table_insert =  ("""Insert into users
+#       (user_id
+#      , first_name
+#        , last_name
+#        , gender
+#        , level) 
+#        values (%s,%s,%s,%s,%s)
+#        ON CONFLICT (user_id) 
+#        DO NOTHING;
+#""")
+
 user_table_insert =  ("""Insert into users
-        (user_id
+       (user_id
         , first_name
         , last_name
         , gender
         , level) 
         values (%s,%s,%s,%s,%s)
         ON CONFLICT (user_id) 
-        DO NOTHING;
+            DO UPDATE SET level = EXCLUDED.level;  
 """)
+#ON CONFLICT DO UPDATE SET level = EXCLUDED.level
+
+
+
 
 song_table_insert = ("""Insert into songs
         (song_id 
@@ -88,7 +98,9 @@ song_table_insert = ("""Insert into songs
         , artist_id 
         , year 
         , duration ) 
-        values (%s,%s,%s,%s,%s);
+        values (%s,%s,%s,%s,%s)
+        ON CONFLICT (song_id) 
+        DO NOTHING;
 """)
 
 artist_table_insert = ("""Insert into artists
